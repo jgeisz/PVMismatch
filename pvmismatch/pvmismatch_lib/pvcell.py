@@ -10,7 +10,7 @@ from future.utils import iteritems
 from pvmismatch.pvmismatch_lib.pvconstants import PVconstants
 import numpy as np
 from matplotlib import pyplot as plt
-from scipy.optimize import newton
+from scipy.optimize import newton, brentq
 
 # Defaults
 RS = 0.004267236774264931  # [ohm] series resistance
@@ -283,6 +283,7 @@ class PVcell(object):
         """
         args = (np.float64(Vcell), self.Igen, self.Rs, self.Vt,
                 self.Isat1, self.Isat2, self.Rsh)
+                
         return newton(self.f_Icell, x0=self.Isc, args=args)
 
     @staticmethod
@@ -297,8 +298,15 @@ class PVcell(object):
         """
         args = (np.float64(Icell), self.Igen, self.Rs, self.Vt,
                 self.Isat1, self.Isat2, self.Rsh)
-        return newton(self.f_Vcell, x0=self.Voc, args=args)
 
+        try: 
+            Vcell = brentq(self.f_Vcell, -10., 3, args=args,
+                           xtol=1e-3, rtol=1e-6, maxiter=10000, full_output=False, disp=True)           
+        except:
+            Vcell = np.nan
+            
+        return Vcell
+                
     def plot(self):
         """
         Plot cell I-V curve.
