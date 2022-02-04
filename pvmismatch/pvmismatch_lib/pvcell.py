@@ -27,6 +27,13 @@ EG = 1.1  # [eV] band gap of cSi
 ALPHA_ISC = 0.0003551  # [1/K] short circuit current temperature coefficient
 EPS = np.finfo(np.float64).eps
 
+# numerical calculation parameters
+VLIM_REVERSE=10.
+VLIM_FORWARD=3.
+VTOL= 0.0001
+EPSREL=1e-15
+MAXITER=1000
+
 class PVcell(object):
     """
     Class for PV cells.
@@ -300,8 +307,9 @@ class PVcell(object):
                 self.Isat1, self.Isat2, self.Rsh)
 
         try: 
-            Vcell = brentq(self.f_Vcell, -10., 3, args=args,
-                           xtol=1e-3, rtol=1e-6, maxiter=10000, full_output=False, disp=True)           
+            Vcell = brentq(self.f_Vcell, -VLIM_REVERSE, VLIM_FORWARD, args=args,
+                            xtol=VTOL, rtol=EPSREL, maxiter=MAXITER,
+                            full_output=False, disp=True)           
         except:
             Vcell = np.nan
             
